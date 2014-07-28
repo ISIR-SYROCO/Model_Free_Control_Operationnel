@@ -1,0 +1,61 @@
+// Au démarrage de l'interface ou avec un bouton start
+
+import("lwr_fri")
+import("model_free_control_cart")
+
+loadComponent("lwr", "lwr_fri::FRIRTNetComponent")
+loadComponent("RMController", "KukaRMControllerRTNET")
+
+setActivity("lwr", 0, 99, ORO_SCHED_RT)
+setActivity("RMController", 0.001, 90, ORO_SCHED_RT)
+
+lwr.local_port = 49938
+lwr.configure
+
+connectPeers("lwr","RMController")
+RMController.setPeer("lwr")
+
+var ConnPolicy cp
+//Only last data written is accessible
+cp.type = DATA
+//Use mutexes
+cp.lock_policy = LOCKED
+
+//Port connection
+connect("lwr.events", "RMController.Events_i", cp)
+connect("lwr.RobotState","RMController.RobotState_i",cp)
+connect("lwr.msrJntPos", "RMController.MsrJntPos_i", cp)
+connect("lwr.msrJntVel","RMController.msrJntVel_i",cp)
+connect("lwr.msrJntTrq", "RMController.MsrJntTrq_i",cp)
+connect("lwr.msrCartPos", "RMController.MsrCartPos_i", cp)
+connect("RMController.JointPositions_o","lwr.desJntPos",cp)
+connect("RMController.JointTorques_o","lwr.desAddJntTrq",cp)
+
+RMController.configure
+RMController.friReset
+
+lwr.control_mode=7
+lwr.start
+
+const double PI = 3.141592653589793238462643383280
+const double a = 0.2
+const double theta = PI/6.0
+var array Xinit = array(0.5, 0.0, 0.0)
+var string nameErr = "errData1.mat"
+var string nameTrq = "trqData1.mat"
+const bool writeInFile = true
+var array stiffness = array(7, 0.0)
+var array damping = array(7, 0.0)
+
+RMController.setTheta(theta)
+RMController.setA(a)
+RMController.setXinit(Xinit)
+RMController.setName(nameErr, nameTrq)
+RMController.setAllowWritingData(writeInFile)
+RMController.setMAFDelta(30);
+//RMController.setAMAFLength(2,10,30)
+RMController.setJointImpedance(stiffness, damping)
+
+// A envoyer depuis l'interface graphique
+//RMController.setControlStrategy(7)
+//RMController.start

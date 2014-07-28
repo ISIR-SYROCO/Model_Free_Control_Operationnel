@@ -1,0 +1,15 @@
+<package>
+    <description brief="Orocos kuka_model_free_control_art Component package">
+        This package contains the orocos components to control the kuka with a model-free controller in the joint space
+    </description>
+    <license>LGPL v2</license>
+    <author>Vincent SAMY</author>
+    <depend package="rtt" />
+    <depend package="rtt_motion_control_msgs" />
+    <depend package="rtt_geometry_msgs"/>
+    <depend package="rtt_sensor_msgs" />
+    <depend package="kuka_lwr_fri" />
+    <depend package="lwr_fri" />
+    <depend package="fri_examples" />
+</package>
+
